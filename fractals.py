@@ -61,13 +61,21 @@ tree_wind_fractal = ((Segment(0, 0, 10, 0, -1), Segment(10, 0, 14, -6, -1),
     [Segment(0, 0, 0, -100, 0)],
     10)
 
-koch_flake = ((Segment(0, 0, 10/3, 0, -1), Segment(10/3, 0, 5, sqrt(75)/3, -1),
+levi_curve = ((Segment(0, 0, 5, -5, -1), Segment(5, -5, 10, 0, -1)),
+    [Segment(0, 0, 200, 0, 0)],
+    16)
+
+koch_snowflake = ((Segment(0, 0, 10/3, 0, -1), Segment(10/3, 0, 5, sqrt(75)/3, -1),
     Segment(5, sqrt(75)/3, 20/3, 0, -1), Segment(20/3, 0, 10, 0, -1)),
     [Segment(0, 0, 150, 150 * sqrt(3), 0), Segment(150, 150 * sqrt(3), 300, 0, 0),
      Segment(300, 0, 0, 0, 0)], 6)
 
-dragon_fractal = ((Segment(5, 0, 0, -5, -1), Segment(5, 0, 10, 5, -1)),
+dragon_curve = ((Segment(5, 0, 0, -5, -1), Segment(5, 0, 10, -5, -1)),
     [Segment(0, 0, 300, 0, 0)],
+    16)
+
+curve_like_dragon = ((Segment(5, 0, 0, -5, -1), Segment(5, 0, 10, 5, -1)),
+    [Segment(0, 0, 150, 0, 0)],
     16)
 
 #-----------------------#
@@ -80,7 +88,7 @@ root = Tk()
 canvas = Canvas(root, width = center * 2, height = center * 2)
 canvas.pack()
 
-fractal = generate_fractal(*dragon_fractal)
+fractal = generate_fractal(*dragon_curve)
 for segment in fractal:
     x1, y1, x2, y2 = segment.x1, segment.y1, segment.x2, segment.y2
     x1 += center; x2 += center
