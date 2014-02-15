@@ -84,6 +84,18 @@ sierpinski_triangle = ((Segment(0, 0, 5, 0, -1), Segment(5, 0, 10, 0, -1),
      Segment(0, 0, 150, -150 * sqrt(3), 0), 
      Segment(150, -150 * sqrt(3), 300, 0, 0)], 8)
 
+sierpinski_carpet = ((
+    Segment(0   ,    0, 10/3,    0, -1),
+    Segment(10/3,    0, 20/3,    0, -1),
+    Segment(20/3,    0,   10,    0, -1),
+    Segment(10/3,    0, 10/3, 10/3, -1), Segment(10/3, 10/3, 10/3, 0, -1),
+    Segment(10/3, 10/3, 10/3, 20/3, -1),
+    Segment(20/3,    0, 20/3, 10/3, -1), Segment(20/3, 10/3, 20/3, 0, -1)),
+    [Segment(0, 0, 300, 0, 0),
+     Segment(300, 0, 300, 300, 0), 
+     Segment(300, 300, 0, 300, 0),
+     Segment(0, 300, 0, 0, 0)], 4)
+
 triangle_fractal = ((Segment(0, 0, 5, 0, -1), Segment(5, 0, 10, 0, -1),
     Segment(2.5, 2.5 * sqrt(3), 5, 0, -1), Segment(7.5, 2.5 * sqrt(3), 5, 0, -1)),
     [Segment(300, 0, 0, 0, 0),
@@ -92,33 +104,41 @@ triangle_fractal = ((Segment(0, 0, 5, 0, -1), Segment(5, 0, 10, 0, -1),
 
 #-----------------------#
 
+RENDERING_FRACTAL = dragon_curve
 
-from tkinter import Tk, Canvas
+from tkinter import Tk, Canvas, ALL
 
 center = 400
 root = Tk()
 canvas = Canvas(root, width = center * 2, height = center * 2)
 canvas.pack()
 
-fractal = generate_fractal(*sierpinski_triangle)
-for segment in fractal:
-    x1, y1, x2, y2 = segment.x1, segment.y1, segment.x2, segment.y2
-    x1 += center; x2 += center
-    y1 += center; y2 += center
-    canvas.create_line(x1, y1, x2, y2)
-
-'''fractal = begin
-number_of_generations = 0
-def rendering():
-    global number_of_generations
-    number_of_generations += 1
-    fractal = generate_fractal(template, begin, number_of_generations)
-    for segment in fractal:
-        x1, y1, x2, y2 = segment.x1, segment.y1, segment.x2, segment.y2
+def rendering(fractal):
+    segments = generate_fractal(*fractal)
+    for segment in segments:
+        x1, y1, x2, y2, _ = segment
         x1 += center; x2 += center
         y1 += center; y2 += center
-        canvas.create_line(x1, y1, x2, y2, fill='green')
-    root.after(150, rendering)
+        canvas.create_line(x1, y1, x2, y2)
 
-root.after_idle(rendering)'''
+_number_of_generations = 0
+_segments = []
+def rendering2(fractal, ms=300):
+    global _number_of_generations, _segments
+    _number_of_generations += 1
+    template, begin, number_of_generations = fractal
+    if number_of_generations < _number_of_generations:
+        return
+    canvas.delete(ALL)
+    if _segments == []:
+        _segments = begin
+    _segments = generate_fractal(template, _segments, _number_of_generations)
+    for segment in _segments:
+        x1, y1, x2, y2, _ = segment
+        x1 += center; x2 += center
+        y1 += center; y2 += center
+        canvas.create_line(x1, y1, x2, y2)
+    root.after(ms, lambda: rendering2(fractal))
+
+root.after_idle(lambda: rendering2(RENDERING_FRACTAL))
 root.mainloop()
