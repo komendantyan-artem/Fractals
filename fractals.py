@@ -102,43 +102,82 @@ triangle_fractal = ((Segment(0, 0, 5, 0, -1), Segment(5, 0, 10, 0, -1),
      Segment(0, 0, 150, -150 * sqrt(3), 0), 
      Segment(150, -150 * sqrt(3), 300, 0, 0)], 4)
 
+new_fractal = ((Segment(0, 0, 7, 0, -1), Segment(3.5, -3.5, 3.5, 3.5, -1)),
+    [Segment(0, 0, 500, 0, 0)],
+    16)
+
 #-----------------------#
 
-RENDERING_FRACTAL = dragon_curve
+from tkinter import *
 
-from tkinter import Tk, Canvas, ALL
+def rendering():
+    try:
+        tmp = [float(i) for i in text_template.get("0.0", END).split()]
+        template = [Segment(tmp[i], tmp[i + 1], tmp[i + 2], tmp[i + 3], -1)
+                        for i in range(0, len(tmp), 4)]
+    except Exception as e:
+        print(e)
+        return
+    try:
+        tmp = [float(i) for i in text_begin.get("0.0", END).split()]
+        begin = [Segment(tmp[i], tmp[i + 1], tmp[i + 2], tmp[i + 3], 0)
+                        for i in range(0, len(tmp), 4)]
+    except Exception as e:
+        print(e)
+        return
+    try:
+        number_of_generations = int(text_generations.get())
+        if number_of_generations < 0:
+            print("less than 0")
+    except Exception as e:
+        print(e)
+        return
+    global _number_of_generations, _segments
+    _number_of_generations, _segments = 0, []
+    root.after_cancel(ALL)
+    rendering2((template, begin, number_of_generations))
 
 center = 400
+
 root = Tk()
-canvas = Canvas(root, width = center * 2, height = center * 2)
-canvas.pack()
+root.title("Fractals")
+root.geometry("{0}x{1}".format(center * 2 + 225, center * 2 + 5))
+root.resizable(False, False)
 
-def rendering(fractal):
-    segments = generate_fractal(*fractal)
-    for segment in segments:
-        x1, y1, x2, y2, _ = segment
-        x1 += center; x2 += center
-        y1 += center; y2 += center
-        canvas.create_line(x1, y1, x2, y2)
+canvas = Canvas(root, width = center * 2, height = center * 2, bg="white")
+canvas.place(x=0, y=0)
 
-_number_of_generations = 0
-_segments = []
+text_template = Text(root, width=25, height=4)
+text_begin = Text(root, width=25, height=4)
+text_generations = Entry(root, width=33)
+generate_button = Button(root, text="Generate!", width=28, command=rendering)
+
+Label(root, text="template", width=25).place(x=center*2+10, y=0)
+text_template.place(x=center*2+10, y=25)
+Label(root, text="start segments", width=25).place(x=center*2+10, y=100)
+text_begin.place(x=center*2+10, y=125)
+Label(root, text="number of generations", width=25).place(x=center*2+10, y=200)
+text_generations.place(x=center*2+10, y=225)
+generate_button.place(x=center*2+10, y=250)
+
+
+
 def rendering2(fractal, ms=300):
     global _number_of_generations, _segments
-    _number_of_generations += 1
     template, begin, number_of_generations = fractal
     if number_of_generations < _number_of_generations:
         return
     canvas.delete(ALL)
     if _segments == []:
         _segments = begin
-    _segments = generate_fractal(template, _segments, _number_of_generations)
+    else:
+        _segments = generate_fractal(template, _segments, _number_of_generations)
     for segment in _segments:
         x1, y1, x2, y2, _ = segment
         x1 += center; x2 += center
         y1 += center; y2 += center
         canvas.create_line(x1, y1, x2, y2)
+    _number_of_generations += 1
     root.after(ms, lambda: rendering2(fractal))
 
-root.after_idle(lambda: rendering2(RENDERING_FRACTAL))
 root.mainloop()
