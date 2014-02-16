@@ -106,6 +106,10 @@ new_fractal = ((Segment(0, 0, 7, 0, -1), Segment(3.5, -3.5, 3.5, 3.5, -1)),
     [Segment(0, 0, 500, 0, 0)],
     16)
 
+
+programm_help = """It's help"""
+fractals_examples = """There is fractals"""
+
 #-----------------------#
 
 from tkinter import *
@@ -115,52 +119,29 @@ def rendering():
         tmp = [float(i) for i in text_template.get("0.0", END).split()]
         template = [Segment(tmp[i], tmp[i + 1], tmp[i + 2], tmp[i + 3], -1)
                         for i in range(0, len(tmp), 4)]
-    except Exception as e:
-        print(e)
+    except:
+        write_to_helper("Неправильный шаблон.")
         return
     try:
         tmp = [float(i) for i in text_begin.get("0.0", END).split()]
         begin = [Segment(tmp[i], tmp[i + 1], tmp[i + 2], tmp[i + 3], 0)
                         for i in range(0, len(tmp), 4)]
-    except Exception as e:
-        print(e)
+    except:
+        write_to_helper("Неправильное начальное состояние.")
         return
     try:
         number_of_generations = int(text_generations.get())
         if number_of_generations < 0:
-            print("less than 0")
-    except Exception as e:
-        print(e)
+            write_to_helper("Количество итераций должно быть больше нуля.")
+            return
+    except:
+        write_to_helper("Неправильное количество итераций.")
         return
+    
     global _number_of_generations, _segments
     _number_of_generations, _segments = 0, []
     root.after_cancel(ALL)
     rendering2((template, begin, number_of_generations))
-
-center = 400
-
-root = Tk()
-root.title("Fractals")
-root.geometry("{0}x{1}".format(center * 2 + 225, center * 2 + 5))
-root.resizable(False, False)
-
-canvas = Canvas(root, width = center * 2, height = center * 2, bg="white")
-canvas.place(x=0, y=0)
-
-text_template = Text(root, width=25, height=4)
-text_begin = Text(root, width=25, height=4)
-text_generations = Entry(root, width=33)
-generate_button = Button(root, text="Generate!", width=28, command=rendering)
-
-Label(root, text="template", width=25).place(x=center*2+10, y=0)
-text_template.place(x=center*2+10, y=25)
-Label(root, text="start segments", width=25).place(x=center*2+10, y=100)
-text_begin.place(x=center*2+10, y=125)
-Label(root, text="number of generations", width=25).place(x=center*2+10, y=200)
-text_generations.place(x=center*2+10, y=225)
-generate_button.place(x=center*2+10, y=250)
-
-
 
 def rendering2(fractal, ms=300):
     global _number_of_generations, _segments
@@ -179,5 +160,45 @@ def rendering2(fractal, ms=300):
         canvas.create_line(x1, y1, x2, y2)
     _number_of_generations += 1
     root.after(ms, lambda: rendering2(fractal))
+
+
+def write_to_helper(text):
+    text_helper.delete(0.0, END)
+    text_helper.insert(1.0, text)
+    
+
+
+center = 400
+
+root = Tk()
+root.title("Фракталы")
+root.geometry("{0}x{1}".format(center * 2 + 225, center * 2 + 5))
+root.resizable(False, False)
+
+canvas = Canvas(root, width = center * 2, height = center * 2, bg="white")
+canvas.place(x=0, y=0)
+
+text_template = Text(root, width=25, height=4, wrap=NONE)
+text_begin = Text(root, width=25, height=4, wrap=NONE)
+text_generations = Entry(root, width=33)
+generate_button = Button(root, text="Построить фрактал", width=28, command=rendering)
+
+Label(root, text="Шаблон", width=25).place(x=center*2+10, y=0)
+text_template.place(x=center*2+10, y=25)
+Label(root, text="Начальное состояние", width=25).place(x=center*2+10, y=100)
+text_begin.place(x=center*2+10, y=125)
+Label(root, text="Количество итераций", width=25).place(x=center*2+10, y=200)
+text_generations.place(x=center*2+10, y=225)
+generate_button.place(x=center*2+10, y=250)
+
+text_helper = Text(root, width=25, height=20, wrap=WORD)
+button_help = Button(root, text="Помощь", width=28,
+    command=lambda: write_to_helper(programm_help))
+button_examples = Button(root, text="Примеры", width=28,
+    command=lambda: write_to_helper(fractals_examples))
+
+text_helper.place(x=center*2+10, y=400)
+button_help.place(x=center*2+10, y=730)
+button_examples.place(x=center*2+10, y=760)
 
 root.mainloop()
